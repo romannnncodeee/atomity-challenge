@@ -1,51 +1,68 @@
 # Atomity Frontend Challenge — Option A
-## Cluster → Namespace → Pod Drill-Down Dashboard
+
+## Overview
+
+For this challenge, I chose Option A and built an interactive cluster → namespace → pod drill-down experience inspired by infrastructure observability platforms.
+My goal was to focus on animation quality, component architecture, and data handling while keeping the implementation lightweight and maintainable. Rather than recreating the reference video exactly, I used it as inspiration and created my own interpretation of theinteraction.
 
 ## Approach
 
-My approach was to build a production-grade infrastructure observability dashboard
-from scratch — no component libraries, just React, Framer Motion, and a centralized
-CSS variable design token system.
+### Design Token System
 
-### 1. Design Token System
-Instead of hardcoding values everywhere, I created a single source of truth in
-`src/tokens/design-system.js`. Every color, spacing, radius, and font size is
-defined as a CSS variable and mirrored in a JS `tokens` object. This means the
-entire theme can be changed in one file.
+To keep styling consistent and maintainable, I created a centralized design token system in `src/tokens/design-system.js`.
 
-### 2. Data & Caching Strategy
-I fetch from JSONPlaceholder's public API and deterministically map the response
-to realistic infrastructure metrics using a seeded random function — so the same
-post ID always produces the same CPU/memory/cost values.
+Colors, spacing, typography, border radii, and animation values are defined once and reused throughout the application via CSS variables and a shared `tokens` object. This avoids hardcoded values across components and makes future theme changes much easier.
 
-To avoid redundant network requests, I built a global in-memory cache object
-outside React with a 5-minute stale window. Navigating back to a previously
-visited cluster or namespace returns data instantly from cache.
+### Data Fetching & Caching
 
-### 3. Spatial Morphing Drill-Down
-The core interaction uses Framer Motion's `layoutId` — when you click a cluster
-card, it doesn't just disappear and get replaced. It physically morphs and expands
-to become the header of the namespace view. Same transition happens from namespace
-to pod level.
+The dashboard fetches data from the JSONPlaceholder API and transforms the response into infrastructure-style metrics such as CPU usage, memory usage, pod counts, and estimated costs.
 
-### 4. Scroll-Triggered Animations
-The dashboard section uses `useInView` and `useScroll` from Framer Motion to
-detect scroll position. As the section enters the viewport, the dashboard card
-elevates and reveals itself with staggered child transitions.
+To prevent unnecessary network requests, I implemented a lightweight in-memory caching layer with a 5-minute stale window. Returning to previously viewed clusters or namespaces displays cached data immediately instead of triggering another request.
 
-### 5. Modern CSS
-- **Fluid typography** — all font sizes use `clamp()` so they scale smoothly
-- **Container queries** — metric cards shift layout based on their own width
-- **Logical properties** — `margin-inline`, `padding-block` used throughout
-- **prefers-reduced-motion** — all animations degrade to instant if the user
-  has reduced motion enabled in their OS
+Loading, success, and error states are handled to ensure the UI remains responsive during data fetching.
+
+### Drill-Down Interaction
+
+The main interaction allows users to navigate from clusters to namespaces and then to individual pods.
+
+I used Framer Motion's `layoutId` feature to create smooth shared-layout transitions between views. Instead of replacing screens abruptly, selected elements transition naturally into the next level, helping maintain context as users move through the hierarchy.
+
+### Scroll-Based Animation
+
+The feature section uses `useInView` and `useScroll` from Framer Motion to trigger animations based on viewport position.
+
+As the section enters view, content is revealed progressively with staggered motion and subtle elevation effects. Animations are designed to support the content rather than distract from it.
+
+### Modern CSS Features
+
+The project incorporates several modern CSS techniques:
+
+* `clamp()` for fluid typography and spacing
+* Container queries for component-level responsiveness
+* Logical properties such as `margin-inline` and `padding-block`
+* CSS custom properties for design tokens
+* `prefers-reduced-motion` support for users who disable animations at the operating system level
+
 
 ## Tech Stack
-- React 18
-- Framer Motion 11
-- Vite
-- Zero component libraries
 
+* React 18
+* Vite
+* Framer Motion 11
+* JavaScript
+* CSS Variables
+* Custom-built components (no UI libraries)
+
+## Tradeoffs & Future Improvements
+
+To keep the project focused within the challenge timeframe, I implemented a simple custom caching solution instead of introducing an additional dependency such as React Query.
+
+* Expand the drill-down hierarchy with additional infrastructure layers
+* Improve keyboard navigation and accessibility coverage
+* Add more advanced telemetry visualizations and filtering options
 ## Run Locally
+
+```bash
 npm install
 npm run dev
+
